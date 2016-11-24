@@ -9,6 +9,13 @@ body {
   padding-top: 8px;
 }
 
+#main .delimiter {
+  border-bottom: 1px solid #586e75;
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-top: 12px;
+}
+
 #main .item {
   margin-top: 8px;
   clear: both;
