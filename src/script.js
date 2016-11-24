@@ -64,7 +64,7 @@ function main() {
 
   s.onmessage = function(msg) {
     var data = JSON.parse(msg.data);
-    log.push({log_id: id++, log_data: data});
+    log.unshift({log_id: id++, log_data: data});
     render(log);
   };
 
