@@ -79,11 +79,29 @@ function main() {
   window.onkeyup = function(e) {
      var key = e.keyCode ? e.keyCode : e.which;
 
+     // h
      if (key == 72) {
        if (!log[0] || (log[0] && !log[0].log_delimiter)) {
          log.unshift({log_id: id++, log_delimiter: true});
          render(log);
        }
+     }
+     // l
+     else if (key == 76) {
+       console.log(JSON.stringify(log));
+     }
+     // w
+     else if (key == 87) {
+       localStorage.setItem('log', JSON.stringify(log));
+     }
+     // e
+     else if (key == 69) {
+       try {
+         log = JSON.parse(localStorage.getItem('log'));
+       }
+       catch(e) {
+       }
+       render(log);
      }
   }
 }
