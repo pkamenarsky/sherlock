@@ -1,8 +1,52 @@
-function render(log) {
+// http://stackoverflow.com/a/30503290/634020
+function snapshot(obj) {
+  if(obj == null || typeof(obj) != 'object') {
+    return obj;
+  }
+
+  var temp = new obj.constructor();
+
+  for(var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      temp[key] = snapshot(obj[key]);
+    }
+  }
+
+  return temp;
+}
+
+// http://stackoverflow.com/a/25859853/634020
+function evalInContext(js, context) {
+  //# Return the results of the in-line anonymous function we .call with the passed context
+  try {
+    return { success: function() { with(context) { return eval(js) } }.call(context) };
+  }
+  catch(e) {
+    return { error: e };
+  }
+}
+
+function render(log, query) {
   var main = document.getElementById('main');
+  var error = document.getElementById('error');
   var frag = document.createDocumentFragment();
 
-  log.forEach(function(msg) {
+  var islog  = function(e) { return e.log_data },
+      maplog = function(e) { return { log_data: e} };
+
+  var log_;
+  var result = query !== '' ? evalInContext(query, { $: log.map(function(e) {return snapshot(e);}).filter(islog).map(islog) }) : { error: '' };
+
+  if (result.success) {
+    log_ = result.success.map(maplog);
+    error.textContent = '';
+  }
+  else {
+    log_ = log;
+    error.textContent = result.error;
+  }
+
+  log_.forEach(function(msg) {
     var item = document.createElement("div");
     item.className = 'item';
 
@@ -63,6 +107,7 @@ function main() {
 
   var id = 0;
   var log = [];
+  var query = '';
 
   s.onopen = function() {
   };
@@ -70,38 +115,49 @@ function main() {
   s.onmessage = function(msg) {
     var data = JSON.parse(msg.data);
     log.unshift({log_id: id++, log_data: data});
-    render(log);
+    render(log, query);
   };
 
   s.onerror = function(msg) {
   };
 
   window.onkeyup = function(e) {
-     var key = e.keyCode ? e.keyCode : e.which;
+    var queryElement = document.getElementById("query");
+    var key = e.keyCode ? e.keyCode : e.which;
 
-     // h
-     if (key == 72) {
-       if (!log[0] || (log[0] && !log[0].log_delimiter)) {
-         log.unshift({log_id: id++, log_delimiter: true});
-         render(log);
-       }
-     }
-     // l
-     else if (key == 76) {
-       console.log(JSON.stringify(log));
-     }
-     // w
-     else if (key == 87) {
-       localStorage.setItem('log', JSON.stringify(log));
-     }
-     // e
-     else if (key == 69) {
-       try {
-         log = JSON.parse(localStorage.getItem('log'));
-       }
-       catch(e) {
-       }
-       render(log);
-     }
+    if (e.target == queryElement) {
+      if (queryElement.value !== query) {
+        query = queryElement.value;
+        render(log, query);
+      }
+
+      return;
+    }
+
+    // h
+    if (key == 72) {
+      if (!log[0] || (log[0] && !log[0].log_delimiter)) {
+        log.unshift({log_id: id++, log_delimiter: true });
+        render(log, query);
+      }
+    }
+    // l
+    else if (key == 76) {
+      console.log(JSON.stringify(log));
+    }
+    // w
+    else if (key == 87) {
+      localStorage.setItem('log', JSON.stringify(log));
+    }
+    // e
+    else if (key == 69) {
+      try {
+        log = JSON.parse(localStorage.getItem('log'));
+      }
+      catch(e) {
+        console.log(e);
+      }
+      render(log, query);
+    }
   }
 }
