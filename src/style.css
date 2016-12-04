@@ -77,9 +77,9 @@ body {
 #main .item .kv {
   display: inline-block;
   margin-left: 16px;
-  width: 200px;
+  width: 120px;
 }
 
 #main .item .kv.log-type {
-  width: 200px;
+  width: 120px;
 }

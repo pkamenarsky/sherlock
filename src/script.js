@@ -37,69 +37,69 @@ function render(log, query) {
   var log_;
   var result = query !== '' ? evalInContext(query, { $: log.map(function(e) {return snapshot(e);}).filter(islog).map(islog) }) : { error: '' };
 
-  if (result.error) {
+  if (result.success) {
+    log_ = result.success.map(maplog);
+    error.textContent = '';
+  }
+  else {
     log_ = log;
     error.textContent = result.error;
   }
-  else {
-    log_ = result.success.map(maplog);
-    error.textContent = '';
 
   log_.forEach(function(msg) {
-      var item = document.createElement("div");
-      item.className = 'item';
+    var item = document.createElement("div");
+    item.className = 'item';
 
-      if (msg.log_delimiter) {
-        item.className = 'delimiter';
-      }
-      else {
-        if (msg.log_data.log_level) {
-          item.className = 'item ' + msg.log_data.log_level;
-        }
-
-        if (msg.log_data.log_color) {
-          item.style.color = msg.log_data.log_color;
-        }
-
-        if (msg.log_data.log_type) {
-            var kv = document.createElement("div");
-            kv.className = 'kv log-type';
-            item.appendChild(kv);
-
-            var v = document.createElement("div");
-            v.className = 'v';
-            v.textContent = msg.log_data.log_type;
-            kv.appendChild(v);
-        }
-
-        for (var key in msg.log_data) {
-          if (key !== 'log_type'
-              && key !== 'log_level'
-              && key !== 'log_color'
-              && msg.log_data.hasOwnProperty(key)) {
-            var kv = document.createElement("div");
-            kv.className = 'kv';
-            item.appendChild(kv);
-
-            var k = document.createElement("div");
-            k.className = 'k';
-            k.textContent = key;
-            kv.appendChild(k);
-
-            var v = document.createElement("div");
-            v.className = 'v';
-            v.textContent = msg.log_data[key];
-            kv.appendChild(v);
-          }
-        }
+    if (msg.log_delimiter) {
+      item.className = 'delimiter';
+    }
+    else {
+      if (msg.log_data.log_level) {
+        item.className = 'item ' + msg.log_data.log_level;
       }
 
-      frag.appendChild(item);
-    });
+      if (msg.log_data.log_color) {
+        item.style.color = msg.log_data.log_color;
+      }
 
-    main.innerHTML = '';
-    main.appendChild(frag);
-  }
+      if (msg.log_data.log_type) {
+          var kv = document.createElement("div");
+          kv.className = 'kv log-type';
+          item.appendChild(kv);
+
+          var v = document.createElement("div");
+          v.className = 'v';
+          v.textContent = msg.log_data.log_type;
+          kv.appendChild(v);
+      }
+
+      for (var key in msg.log_data) {
+        if (key !== 'log_type'
+            && key !== 'log_level'
+            && key !== 'log_color'
+            && msg.log_data.hasOwnProperty(key)) {
+          var kv = document.createElement("div");
+          kv.className = 'kv';
+          item.appendChild(kv);
+
+          var k = document.createElement("div");
+          k.className = 'k';
+          k.textContent = key;
+          kv.appendChild(k);
+
+          var v = document.createElement("div");
+          v.className = 'v';
+          v.textContent = msg.log_data[key];
+          kv.appendChild(v);
+        }
+      }
+    }
+
+    frag.appendChild(item);
+  });
+
+  main.innerHTML = '';
+  main.appendChild(frag);
 }
 
 function main() {
